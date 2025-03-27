@@ -29,7 +29,7 @@ const requestFaucet = async (wallet, index) => {
     try {
         console.log(`🔎 Checking eligibility for wallet: ${wallet.bold.green}`);
 
-        const eligibilityUrl = `${ELIGIBILITY_URL}${wallet}`;
+        const eligibilityUrl = `${ELIGIBILITY_URL}${wallet}?claim=true&tier=100`;
         const proxy = getProxyForWallet(index);
 
         // Introduce delay only if no proxy is available
@@ -71,6 +71,11 @@ const requestFaucet = async (wallet, index) => {
         const claimFaucetResponse = await requestWithProxy(depositUrl, proxy);
 
         if (claimFaucetResponse.status === 200) {
+            if (claimFaucetResponse.data?.error) {
+                console.error(`❌ Claim faucet failed: ${claimFaucetResponse.data.error}`.bold.red);
+                return;
+            }
+
             console.log('✅ Claim faucet successful'.bold.green);
             console.log(`  Claim Time: ${new Date(claimFaucetResponse.data.deposit.time * 1000).toLocaleString()}`.gray);
             console.log(`  Reward Amount: ${claimFaucetResponse.data.deposit.usd}`.gray);
